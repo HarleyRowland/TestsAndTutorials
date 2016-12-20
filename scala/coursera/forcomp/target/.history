@@ -1,0 +1,8 @@
+submit harley.rowland@rpharms.com def helper(occurrences: Occurrences): List[Sentence] = occurrences match {
+      case Nil => List(Nil)
+      case list => for {
+        combinations <- combinations(occurrences)
+        word <- dictionaryByOccurrences.get(combinations) match {
+          case Some(words) => words
+          case None => List()
+submit harley.rowland@rpharms.com duOYjkhJkfp84Ngd
