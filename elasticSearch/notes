@@ -52,4 +52,215 @@ Adding without an id i.e:
 	}
 Means that a random one will be used. The one for the above was "AVkg868zv07iib8-vceQ". Note that we need to use POST instead of PUT.
 
+We can update a document which appears to edit the document but under-the-hood it is deleted and remade with the changes. 
 
+Here we change the name field of the document with the id of 1 and add an age field:
+	POST /customer/external/1/_update?pretty
+	{
+  		"doc": { "name": "Johnny Doe", "age" : 25 }
+	}
+
+We can also run scripts on individual documents where ctx._source is the root of the document:
+	POST /customer/external/1/_update?pretty
+	{
+  		"script" : "ctx._source.age += 5"
+	}
+This increments the age field by 5. So it will now be 30.
+
+We can use this to delete a record:
+	DELETE /customer/external/2?pretty
+
+We can add files in batch too: 
+	POST /customer/external/_bulk?pretty
+	{"index":{"_id":"4"}}
+	{"name": "Jack Doe" }
+	{"index":{"_id":"5"}}
+	{"name": "Jerry Doe" }
+
+We can load whole JSON files using a curl command: 
+	curl -XPOST 'localhost:9200/bank/account/_bulk?pretty&refresh' --data-binary "@accounts.json"
+
+Here we are searching the /bank/ index and matching all. We sort by account_number
+	GET /bank/_search?q=*&sort=account_number:asc&pretty
+
+Here is the same search but using the body to explain the search:
+	GET /bank/_search
+	{
+	  "query": { "match_all": {} },
+	  "sort": [
+	    { "account_number": "asc" }
+	  ]
+	}
+The body has the potential to be more expressive.
+
+We can use this to get all documents from bank regardless of type:
+	GET /bank/_search
+	{
+	  "query": { "match_all": {} }
+	}
+
+We can also pass a size parameter which restricts how many things are returned (if 1 is passed, the result returned will be whatever was at the top of the list without it): 
+	GET /bank/_search
+	{
+	  "query": { "match_all": {} },
+	  "size": 1
+	}
+
+Here, we get results 11-20:
+	GET /bank/_search
+	{
+	  "query": { "match_all": {} },
+	  "from": 10,
+	  "size": 10
+	}
+
+We can specify which fields we want to return:
+	GET /bank/_search
+	{
+	  "query": { "match_all": {} },
+	  "_source": ["account_number", "balance"]
+	}
+
+The following will return results which have an account number of exactly 20 (exactly as it is a string):
+	GET /bank/_search
+	{
+	  	"query": { 
+	  		"match": { "account_number": 20 } 
+	  	}
+	}
+
+This will return results where the address field contains the word mill (things like "mill road" or "little mill road" would return): 
+	GET /bank/_search
+	{
+	  "query": { "match": { "address": "mill" } }
+	}
+Passing multiple words would return documents where the field used contains any of those words (OR not AND).
+
+The following will match whole phrases, so the address field will have to contain this exactly but the whole field doesn't need to equal that:
+	GET /bank/_search
+	{
+		"query": { "match_phrase": { "address": "mill lane" } }
+	}
+
+There is something called bool queries which take a number of boolean expressions and each document must evaluate to true for each of them to return:
+	GET /bank/_search
+	{
+	  "query": {
+	    "bool": {
+	      "must": [
+	        { "match": { "address": "mill" } },
+	        { "match": { "address": "lane" } }
+	      ]
+	    }
+	  }
+So document address much contain mill and lane. The word "must" makes this an AND between expressions. If this was "should" instead, it would be an OR. If we used "must_not" then none of the queries can be true for a document for it to be returned. 
+
+We can also group clause types:
+	GET /bank/_search
+	{
+	  "query": {
+	    "bool": {
+	      "must": [
+	        { "match": { "age": "40" } }
+	      ],
+	      "must_not": [
+	        { "match": { "state": "ID" } }
+	      ]
+	    }
+	  }
+	}
+So here, all documents where the age is 40 and the state is not ID will be returned. 
+
+Filtering is used to restrict the index which we search. Although we can do this with queries, the score (_score is the number which explains how well a document matches the query) is effected. Here is an example of filtering:
+	GET /bank/_search
+	{
+	  "query": {
+	    "bool": {
+	      "must": { "match_all": {} },
+	      "filter": {
+	        "range": {
+	          "balance": {
+	            "gte": 20000,
+	            "lte": 30000
+	          }
+	        }
+	      }
+	    }
+	  }
+	}
+We are matching all within a certain range for balance. If we are doing filtering like this, then scores are set to 1. 
+
+Finally is aggregate functions which allow us the manipulate and group our data. Here is an example:
+	GET /bank/_search
+	{
+	  "size": 0,
+	  "aggs": {
+	    "group_by_state": {
+	      "terms": {
+	        "field": "state.keyword"
+	      }
+	    }
+	  }
+	}
+The above groups the documents by the keyword "state" which in this example is a state of America and gives us the amount per state. We set size to 0 to not return any documents. 
+
+Doing the following would return the average balance for each state too:
+	GET /bank/_search
+	{
+	  "size": 0,
+	  "aggs": {
+	    "group_by_state": {
+	      "terms": {
+	        "field": "state.keyword"
+	      },
+	      "aggs": {
+	        "average_balance": {
+	          "avg": {
+	            "field": "balance"
+	          }
+	        }
+	      }
+	    }
+	  }
+	}
+
+The following will first group by age and then by gender and produce an average balance.
+	GET /bank/_search
+	{
+	  "size": 0,
+	  "aggs": {
+	    "group_by_age": {
+	      "range": {
+	        "field": "age",
+	        "ranges": [
+	          {
+	            "from": 20,
+	            "to": 30
+	          },
+	          {
+	            "from": 30,
+	            "to": 40
+	          },
+	          {
+	            "from": 40,
+	            "to": 50
+	          }
+	        ]
+	      },
+	      "aggs": {
+	        "group_by_gender": {
+	          "terms": {
+	            "field": "gender.keyword"
+	          },
+	          "aggs": {
+	            "average_balance": {
+	              "avg": {
+	                "field": "balance"
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }
+	  }
+	}
