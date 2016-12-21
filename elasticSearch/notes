@@ -1,0 +1,55 @@
+https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started.html
+
+All learnt based on the ElasticSearch Documentation
+
+Basic bits: 
+	It is near realtime
+	A Cluster is a group of Nodes where the cluster of Nodes together hold all of your data. You index a Cluster as whole. A Node joins a 		Cluster by the Cluster's name.
+	A Node is a search which holds some data. Unless specified, it will join a cluster called elasticsearch. 
+	An index is like an area of data - a way of separating data.
+	A type is a way of identifier what kind of document a document is. Our types are treatment summaries or drugs.
+	A document is a unit of information which can be indexed. It is expressed as JSON and must have a type. 
+	A shard is a subsection of an index but will act as an independent (although it works with the others - doesn't NEED them). A shard can be 		hosted on any node. This is good is will have a lot of data in an index which wouldn't necessarily fit all in one place. 
+	A replica is a back for a shard. 
+
+Easy to install, just need Java running and download. Run using elasticsearch/bin/elasticsearch
+
+We can do a health check using:
+	GET /_cat/health?v
+
+Which should return stuff related to the cluster including its name (by default elasticsearch) and its status:
+	green is all is good.
+	yellow is the cluster is working fine but no replicas have been allocated. 
+	red means some data is not available. It will still work but should be fixed ASAP
+
+We can get all nodes using: 
+	GET /_cat/nodes?v
+
+We can get all indices using: 
+	GET /_cat/indices?v
+
+We create an index using a PUT:
+	PUT /customer?pretty
+
+This adds a document with a name field and gives it the type external:
+	PUT /customer/external/1
+	{
+	  "name": "John Doe"
+	}
+
+We get that document using:
+	GET /customer/external/1
+
+We can delete an index using:
+	DELETE /customer?pretty
+
+Elastic search will replace or input. So if we try to put another document into customer/external/1 it will replace the old one but if we did it with 2 instead, it will make a new record. 
+
+Adding without an id i.e: 
+	POST /customer/external
+	{
+	  	"name": "Jim Doe"
+	}
+Means that a random one will be used. The one for the above was "AVkg868zv07iib8-vceQ". Note that we need to use POST instead of PUT.
+
+

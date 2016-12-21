@@ -1,0 +1,2 @@
+[2016-12-21T09:55:59,915][INFO ][o.e.c.m.MetaDataCreateIndexService] [c0TGSr8] [customer] creating index, cause [api], templates [], shards [5]/[1], mappings []
+[2016-12-21T10:05:47,777][INFO ][o.e.c.m.MetaDataMappingService] [c0TGSr8] [customer/KXIoxdVVShaxGBagUhpRBw] create_mapping [external]
