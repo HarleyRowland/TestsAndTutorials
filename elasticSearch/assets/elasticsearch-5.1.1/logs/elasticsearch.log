@@ -124,3 +124,7 @@ com.fasterxml.jackson.core.JsonParseException: Unexpected character ('0' (code 4
 	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:450) [netty-transport-4.1.6.Final.jar:4.1.6.Final]
 	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:873) [netty-common-4.1.6.Final.jar:4.1.6.Final]
 	at java.lang.Thread.run(Thread.java:745) [?:1.8.0_111]
+[2016-12-21T15:56:06,558][INFO ][o.e.n.Node               ] [c0TGSr8] stopping ...
+[2016-12-21T15:56:06,636][INFO ][o.e.n.Node               ] [c0TGSr8] stopped
+[2016-12-21T15:56:06,636][INFO ][o.e.n.Node               ] [c0TGSr8] closing ...
+[2016-12-21T15:56:06,657][INFO ][o.e.n.Node               ] [c0TGSr8] closed

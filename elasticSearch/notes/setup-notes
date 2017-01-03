@@ -1,0 +1,30 @@
+ElasticSearch is built using Java and the most recent one needs at least Java 8 to run.
+
+ElasticSearch will not run if a known bad version of Java is used. 
+
+Easiest way to download is through .tar.gz or .zip. Download the most recent ES and run the checksum. go to /bin/elasticSearch to run it. Make a GET Request to check it is running. 
+
+All config files are found within /config/
+
+You can make the user enter a value on startup for a config file by using {prompt.text} as the value for the config field.
+
+You can pass values in at the command line: 
+	./bin/elasticsearch -Edefault.node.name=My_Node
+
+You should change the logs and data files to a different location so that they are not overwritten when we update.
+
+Change the cluster name from the default (which is ElasticSearch)
+
+Change the node name. 
+
+We are set to use our local as the loopback IP but we should change this. A good non-loopback one is: network.host: 192.168.1.10
+
+You need to provide a list of node ip and ports.
+
+We need master nodes to prevent failure when communication drops. You set a minimum number of master nodes for a cluster so that a single cluster won't split into two and then data may be lost. 
+
+ElasticSearch runs some bootstrap checks. If any fail in developement mode, the user is warned. If they fail in production, ElasticSearch won't start.
+
+Developement is when ES is local, production is when ES has binded to an external interface.
+
+Other stuff in this part was related to updating ES and errors related which can be looked into should they come up. 
